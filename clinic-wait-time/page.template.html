@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clinic wait time</title>
+<style>
+:root {
+  --bg: #f4f8fa; --surface: #ffffff; --ink: #11262e; --muted: #42606b;
+  --line: #c4d4da; --control: #6a8794; --accent: #075e78; --on-accent: #ffffff;
+  --ok: #1b6b3a; --warn: #8a5a00; --closed: #5b4a6e; --bad: #9b1c1c;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1a1f; --surface: #16262d; --ink: #e8f1f4; --muted: #9db6bf;
+    --line: #2c4650; --control: #7d98a3; --accent: #5cc0dd; --on-accent: #08232b;
+    --ok: #6fd391; --warn: #f0c060; --closed: #c2b0da; --bad: #ff9b9b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1a1f; --surface: #16262d; --ink: #e8f1f4; --muted: #9db6bf;
+  --line: #2c4650; --control: #7d98a3; --accent: #5cc0dd; --on-accent: #08232b;
+  --ok: #6fd391; --warn: #f0c060; --closed: #c2b0da; --bad: #ff9b9b;
+  color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+main { max-width: 34rem; margin: 0 auto; padding: 1.5rem 1.25rem 2rem; }
+.clinic { margin: 0 0 1.25rem; font-size: 1.125rem; color: var(--muted); }
+.status {
+  background: var(--surface); border: 1px solid var(--line);
+  border-left: 0.5rem solid var(--accent); border-radius: 0.25rem;
+  padding: 1.25rem 1.25rem 1rem;
+}
+.status[data-kind="wait"], .status[data-kind="zero"] { border-left-color: var(--ok); }
+.status[data-kind="aging"], .status[data-kind="stale"], .status[data-kind="nodata"] { border-left-color: var(--warn); }
+.status[data-kind="closed"] { border-left-color: var(--closed); }
+h1 { margin: 0 0 0.5rem; font-size: clamp(2rem, 9vw, 3rem); line-height: 1.1; font-weight: 700; letter-spacing: -0.01em; }
+.detail { margin: 0 0 0.75rem; font-size: 1.25rem; }
+.updated { margin: 0; color: var(--muted); font-size: 1.0625rem; }
+.call {
+  display: block; margin: 1.25rem 0 0; padding: 0.9rem 1rem; min-height: 3rem; box-sizing: border-box;
+  text-align: center; font-size: 1.25rem; font-weight: 600; text-decoration: none;
+  background: var(--accent); color: var(--on-accent); border-radius: 0.25rem;
+}
+.call[hidden] { display: none; }
+.emergency { margin: 1.5rem 0 0; color: var(--muted); font-size: 1rem; }
+.stafflink { display: inline-flex; align-items: center; min-height: 3rem; margin-top: 1rem; color: var(--muted); font-size: 1rem; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--ink); outline-offset: 2px;
+}
+.staff { margin-top: 1.5rem; }
+.staff[hidden], .stafflink[hidden] { display: none; }
+.staff h2 { margin: 0 0 0.75rem; font-size: 1.5rem; }
+.back { display: inline-flex; align-items: center; min-height: 3rem; margin: 0 0 0.5rem; color: var(--accent); font-weight: 600; }
+.now { margin: 0 0 0.5rem; font-size: 1.125rem; }
+.nudge { margin: 0 0 1rem; padding: 0.75rem 1rem; border: 2px solid var(--warn); border-radius: 0.25rem; font-weight: 600; }
+.nudge[hidden] { display: none; }
+.confirm { width: 100%; margin: 0 0 1.25rem; font-weight: 600; border-color: var(--accent); }
+.confirm[hidden] { display: none; }
+fieldset { border: 0; padding: 0; margin: 0 0 1.25rem; }
+legend, label.lbl { display: block; margin: 0 0 0.5rem; font-weight: 700; font-size: 1.125rem; }
+.row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.btn {
+  min-height: 3rem; min-width: 3rem; box-sizing: border-box; padding: 0.5rem 1rem;
+  font: inherit; font-size: 1.125rem; color: var(--ink); background: var(--surface);
+  border: 2px solid var(--control); border-radius: 0.25rem; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--on-accent); font-weight: 700; }
+.readout { font-size: 1.5rem; font-weight: 700; margin: 0 0 0.75rem; }
+.choice { display: flex; align-items: center; gap: 0.6rem; min-height: 3rem; margin: 0 0 0.25rem; }
+.choice input[type="radio"], .hrow input[type="checkbox"] { width: 1.5rem; height: 1.5rem; margin: 0; accent-color: var(--accent); flex: none; }
+.choice input[type="time"] { margin-left: 0.25rem; }
+.hrow { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 0 0.5rem; }
+.hrow .day { flex: 0 0 5.5rem; font-weight: 600; }
+.hrow .on { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 3rem; }
+.hrow .sep { color: var(--muted); }
+input[type="tel"], input[type="time"], select {
+  box-sizing: border-box; min-height: 3rem; padding: 0.5rem 0.75rem;
+  font: inherit; font-size: 1.125rem; color: var(--ink); background: var(--surface);
+  border: 2px solid var(--control); border-radius: 0.25rem;
+}
+input[type="tel"], select { width: 100%; }
+input[type="time"] { width: auto; }
+input[aria-invalid="true"] { border-color: var(--bad); }
+details.settings { margin: 1.5rem 0 0; border-top: 1px solid var(--line); padding-top: 0.5rem; }
+details.settings summary { min-height: 3rem; display: flex; align-items: center; font-weight: 700; font-size: 1.125rem; cursor: pointer; }
+.preview { margin: 0 0 0.75rem; font-size: 1.125rem; }
+.post { width: 100%; background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; font-size: 1.25rem; }
+.post[disabled] { opacity: 0.7; cursor: default; }
+.msg { margin: 0.75rem 0 0; font-weight: 600; }
+.msg:empty { display: none; }
+.err { margin: 0.75rem 0 0; padding: 0.75rem 1rem; border: 2px solid var(--bad); border-radius: 0.25rem; font-weight: 600; }
+.err:empty { display: none; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="clinic" id="clinic"></p>
+  <section class="status" id="status" aria-live="polite" aria-atomic="true" data-kind="nodata">
+    <h1 id="headline">Checking the wait time</h1>
+    <p class="detail" id="detail"></p>
+    <p class="updated" id="updated"></p>
+  </section>
+  <a class="call" id="call" href="#" hidden>Call the clinic</a>
+  <p class="emergency" id="emergency"></p>
+  <a class="stafflink" id="stafflink" href="#staff">Staff</a>
+
+  <section class="staff" id="staff" hidden aria-labelledby="staff-h">
+    <a class="back" href="#">Back to the patient view</a>
+    <h2 id="staff-h">Staff update</h2>
+    <p class="now" id="now"></p>
+    <p class="nudge" id="nudge" hidden></p>
+    <button type="button" class="btn confirm" id="confirm" hidden></button>
+
+    <fieldset id="wait-set">
+      <legend>Current wait</legend>
+      <p class="readout" id="readout"></p>
+      <div class="row" id="presets"></div>
+      <div class="row" style="margin-top:0.5rem">
+        <button type="button" class="btn" id="minus" aria-label="5 minutes less">−5</button>
+        <button type="button" class="btn" id="plus" aria-label="5 minutes more">+5</button>
+      </div>
+    </fieldset>
+
+    <fieldset id="today-set">
+      <legend>Today</legend>
+      <div class="choice"><input type="radio" name="today" id="today-normal" value="normal"><label for="today-normal">Normal hours</label></div>
+      <div class="choice"><input type="radio" name="today" id="today-early" value="early"><label for="today-early">Closing early at</label>
+        <input type="time" id="early-time" aria-label="Closing time today"></div>
+      <div class="choice"><input type="radio" name="today" id="today-closed" value="closed"><label for="today-closed">Closed all day</label></div>
+    </fieldset>
+
+    <p class="preview" id="preview"></p>
+    <button type="button" class="btn post" id="post">Post update</button>
+    <p class="err" id="err" role="alert"></p>
+    <p class="msg" id="msg" role="status"></p>
+
+    <details class="settings" id="settings">
+      <summary>Clinic settings: weekly hours, time zone, phone</summary>
+      <fieldset id="hours-set" style="margin-top:0.75rem">
+        <legend>Weekly hours</legend>
+        <div id="hours"></div>
+      </fieldset>
+      <div style="margin-bottom:1.25rem">
+        <label class="lbl" for="tz">Clinic time zone</label>
+        <select id="tz">
+          <option value="America/New_York">Eastern</option>
+          <option value="America/Chicago">Central</option>
+          <option value="America/Denver">Mountain</option>
+          <option value="America/Phoenix">Arizona</option>
+          <option value="America/Los_Angeles">Pacific</option>
+          <option value="America/Anchorage">Alaska</option>
+          <option value="Pacific/Honolulu">Hawaii</option>
+        </select>
+      </div>
+      <div style="margin-bottom:1.25rem">
+        <label class="lbl" for="phone">Clinic phone number</label>
+        <input type="tel" id="phone" inputmode="tel" autocomplete="off">
+      </div>
+    </details>
+  </section>
+</main>
+
+<script id="state" type="application/json">@@STATE@@</script>
+<script>
+const SRC = @@SRC@@;
+//LOGIC-START
+const S = {
+  noWait: "No wait right now",
+  closed: "The clinic is closed",
+  closedToday: "Closed for the rest of today. ",
+  closedDetail: "Please call the clinic for urgent help.",
+  opens: "Opens ",
+  noData: "No wait time has been posted yet",
+  stale: "We don't have a current wait time",
+  callDetail: "Please call the clinic for the current wait.",
+  aging: "This number is getting old. Please call to confirm before you leave.",
+  emergency: "In an emergency, call 911.",
+  about: "About ",
+  updated: "Updated ",
+  lastUpdated: "Last updated ",
+  justNow: "just now"
+};
+const DAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MAX_WAIT = 240, AGING_MIN = 45, STALE_MIN = 60, SKEW_MIN = 5;
+const TOKEN_SRC = "@@" + "SRC" + "@@", TOKEN_STATE = "@@" + "STATE" + "@@";
+
+function validWait(n) { return typeof n === "number" && Number.isInteger(n) && n >= 0 && n <= MAX_WAIT; }
+function parseTime(s) { const t = typeof s === "string" ? Date.parse(s) : NaN; return Number.isFinite(t) ? t : null; }
+function cleanPhone(p) { return typeof p === "string" && /^[0-9+()\-.\s]{7,20}$/.test(p.trim()) ? p.trim() : ""; }
+function telHref(p) { return "tel:" + p.replace(/[^0-9+]/g, ""); }
+function plural(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+function formatWait(min) {
+  if (min < 60) return plural(min, "minute");
+  const h = Math.floor(min / 60), m = min % 60;
+  return m ? plural(h, "hour") + " " + plural(m, "minute") : plural(h, "hour");
+}
+function relTime(ageMin) {
+  const m = Math.floor(ageMin);
+  if (m < 1) return S.justNow;
+  if (m < 60) return plural(m, "minute") + " ago";
+  return plural(Math.floor(m / 60), "hour") + " ago";
+}
+function defaultFmt(t) { return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+function fmtMin(m) { const h = Math.floor(m / 60), mm = m % 60; return (h % 12 || 12) + ":" + String(mm).padStart(2, "0") + " " + (h >= 12 && h < 24 ? "PM" : "AM"); }
+
+// Hours: every day present, each null (closed) or [openMinute, closeMinute] with open < close, same calendar day.
+function validDay(v) { return v === null || (Array.isArray(v) && v.length === 2 && Number.isInteger(v[0]) && Number.isInteger(v[1]) && v[0] >= 0 && v[1] <= 1440 && v[0] < v[1]); }
+function validHours(h) { return !!h && typeof h === "object" && DAYS.every((d) => validDay(h[d])); }
+// Name of the first bad day (Monday first, as staff see them), or "" if the hours are fine.
+function hoursProblem(h) {
+  if (!h || typeof h !== "object") return "the week";
+  const bad = [1, 2, 3, 4, 5, 6, 0].find((i) => !validDay(h[DAYS[i]]));
+  return bad === undefined ? "" : DAY_NAMES[bad];
+}
+function validOverride(o) {
+  return o === null || (!!o && typeof o === "object" && typeof o.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(o.date) &&
+    (o.closeAt === null || (Number.isInteger(o.closeAt) && o.closeAt >= 0 && o.closeAt <= 1440)));
+}
+function validTz(tz) {
+  if (typeof tz !== "string" || tz === "") return false;
+  try { new Intl.DateTimeFormat("en-US", { timeZone: tz }); return true; } catch (e) { return false; }
+}
+// Day, date and minute of day at the clinic, whatever the viewer's own time zone.
+function clinicClock(now, tz) {
+  if (!validTz(tz)) return null;
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", { timeZone: tz, year: "numeric", month: "2-digit", day: "2-digit", weekday: "short", hour: "numeric", minute: "numeric", hourCycle: "h23" }).formatToParts(new Date(now));
+    const get = (t) => parts.find((x) => x.type === t).value;
+    const day = DAYS.indexOf(get("weekday").slice(0, 3).toLowerCase());
+    const hour = Number(get("hour")), minute = Number(get("minute"));
+    if (day < 0 || !Number.isFinite(hour) || !Number.isFinite(minute)) return null;
+    return { day, date: get("year") + "-" + get("month") + "-" + get("day"), min: (hour % 24) * 60 + minute };
+  } catch (e) { return null; }
+}
+// null = hours or time zone unusable (fail safe: tell patients to call).
+// An override ("closed all day" or "closing early") applies only on the clinic date it was set, so it expires at midnight.
+function scheduleAt(hours, tz, now, override) {
+  if (!validHours(hours)) return null;
+  const c = clinicClock(now, tz);
+  if (!c) return null;
+  let today = hours[DAYS[c.day]], overridden = false;
+  if (override && validOverride(override) && override.date === c.date) {
+    const was = today;
+    today = override.closeAt === null || !was || override.closeAt <= was[0] ? null : [was[0], Math.min(was[1], override.closeAt)];
+    overridden = !!was && (today === null || today[1] < was[1]);
+  }
+  if (today && c.min >= today[0] && c.min < today[1]) return { open: true };
+  for (let i = 0; i <= 7; i++) {
+    const di = (c.day + i) % 7, h = i === 0 ? today : hours[DAYS[di]];
+    if (!h) continue;
+    if (i === 0 && c.min >= h[0]) continue;
+    return { open: false, overridden: overridden && i > 0, next: { ahead: i, day: di, min: h[0] } };
+  }
+  return { open: false, overridden, next: null };
+}
+function nextText(n) {
+  const when = n.ahead === 0 ? "today" : n.ahead === 1 ? "tomorrow" : DAY_NAMES[n.day];
+  return S.opens + when + " at " + fmtMin(n.min) + ". ";
+}
+
+// The one place that decides what a patient sees. Pure: same input, same output.
+function describe(state, now, fmtTime) {
+  fmtTime = fmtTime || defaultFmt;
+  const st = state && typeof state === "object" ? state : {};
+  const phone = cleanPhone(st.phone);
+  const t = parseTime(st.updatedAt);
+  const out = (kind, headline, detail, updated) => ({ kind, headline, detail, updated, phone });
+  const sched = scheduleAt(st.hours, st.tz, now, st.override);
+  if (sched === null) return out("nodata", S.noData, S.callDetail, "");
+  if (!sched.open) {
+    return out("closed", S.closed, (sched.overridden ? S.closedToday : "") + (sched.next ? nextText(sched.next) : "") + S.closedDetail, "");
+  }
+  if (!validWait(st.wait) || t === null || t - now > SKEW_MIN * 60000) {
+    return out("nodata", S.noData, S.callDetail, "");
+  }
+  const ageMin = Math.max(0, now - t) / 60000;
+  if (ageMin > STALE_MIN) {
+    return out("stale", S.stale, S.callDetail, S.lastUpdated + fmtTime(t));
+  }
+  const updated = S.updated + fmtTime(t) + " (" + relTime(ageMin) + ")";
+  if (st.wait === 0) return out("zero", S.noWait, ageMin >= AGING_MIN ? S.aging : "", updated);
+  return out(ageMin >= AGING_MIN ? "aging" : "wait", S.about + formatWait(st.wait), ageMin >= AGING_MIN ? S.aging : "", updated);
+}
+
+// Staff input is the trust boundary: validate here, nowhere else.
+// override: undefined keeps the stored one, null clears it, {mode:"closed"} or {mode:"early", closeAt} sets it for the clinic's today.
+function nextState(prev, input, nowIso) {
+  prev = prev || {}; input = input || {};
+  if (!validWait(input.wait)) return { ok: false, error: "wait" };
+  const rawPhone = typeof input.phone === "string" ? input.phone.trim() : "";
+  if (rawPhone !== "" && cleanPhone(rawPhone) === "") return { ok: false, error: "phone" };
+  const hours = input.hours === undefined ? prev.hours : input.hours;
+  if (!validHours(hours)) return { ok: false, error: "hours", day: hoursProblem(hours) };
+  const tz = input.tz === undefined ? prev.tz : input.tz;
+  if (!validTz(tz)) return { ok: false, error: "tz" };
+  let override = input.override === undefined ? (validOverride(prev.override) ? prev.override : null) : null;
+  if (input.override !== undefined && input.override !== null) {
+    const o = input.override, c = clinicClock(Date.parse(nowIso), tz);
+    if (!c || !o || (o.mode !== "closed" && !(o.mode === "early" && Number.isInteger(o.closeAt) && o.closeAt >= 0 && o.closeAt <= 1440))) return { ok: false, error: "override" };
+    override = { date: c.date, closeAt: o.mode === "closed" ? null : o.closeAt };
+  }
+  const clean = {};
+  DAYS.forEach((d) => { clean[d] = hours[d] === null ? null : [hours[d][0], hours[d][1]]; });
+  return { ok: true, state: { name: prev.name || "", phone: rawPhone, tz, hours: clean, override, wait: input.wait, updatedAt: nowIso } };
+}
+
+// "Confirm" re-posts the wait already on the page with a fresh time. It reuses every stored setting, so one tap cannot change anything else.
+function confirmInput(state) {
+  if (!state || typeof state !== "object" || !validWait(state.wait)) return null;
+  return { wait: state.wait, phone: typeof state.phone === "string" ? state.phone : "", hours: state.hours, tz: state.tz };
+}
+function confirmLabel(state) { return "Confirm: still " + (state.wait === 0 ? "no wait" : "about " + formatWait(state.wait)); }
+
+function safeJson(v) { return JSON.stringify(v).replace(/</g, "\\u003c").replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029"); }
+// Rebuild this exact page with new state. SRC is the page's own template.
+function buildPage(state) {
+  return SRC.replace(TOKEN_SRC, () => safeJson(SRC)).replace(TOKEN_STATE, () => safeJson(state));
+}
+//LOGIC-END
+
+const $ = (id) => document.getElementById(id);
+const DEFAULT_HOURS = { sun: null, mon: [480, 1020], tue: [480, 1020], wed: [480, 1020], thu: [480, 1020], fri: [480, 1020], sat: [540, 780] };
+let STATE = {};
+try { STATE = JSON.parse($("state").textContent) || {}; } catch (e) { STATE = {}; }
+let draft = { wait: validWait(STATE.wait) ? STATE.wait : 30 };
+
+// Write to the DOM only when something changed, so a screen reader is not re-told an unchanged status.
+function setText(el, text) { if (el.textContent !== text) el.textContent = text; }
+function setHidden(el, hidden) { if (el.hidden !== hidden) el.hidden = hidden; }
+function setAttr(el, name, value) { if (el.getAttribute(name) !== value) el.setAttribute(name, value); }
+
+function render() {
+  const d = describe(STATE, Date.now());
+  setText($("clinic"), STATE.name || "");
+  setAttr($("status"), "data-kind", d.kind);
+  setText($("headline"), d.headline);
+  setText($("detail"), d.detail); setHidden($("detail"), !d.detail);
+  setText($("updated"), d.updated); setHidden($("updated"), !d.updated);
+  const call = $("call");
+  if (d.phone) { setAttr(call, "href", telHref(d.phone)); setText(call, "Call " + d.phone); setHidden(call, false); }
+  else { setHidden(call, true); }
+  setText($("emergency"), S.emergency);
+  renderNow(d);
+}
+
+function renderNow(d) {
+  const t = parseTime(STATE.updatedAt), age = t === null ? null : Math.max(0, (Date.now() - t) / 60000);
+  setText($("now"), "Patients see now: " + d.headline + (age === null ? "." : ". Last posted " + relTime(age) + "."));
+  const nudge = d.kind !== "closed" && (age === null || age >= AGING_MIN);
+  setText($("nudge"), age === null ? "No wait time is posted. Choose a wait and post it so patients can see it." : "It has been " + formatWait(Math.floor(age)) + " since the last update. Confirm that the wait is unchanged, or choose a new wait and post.");
+  setHidden($("nudge"), !nudge);
+  const canConfirm = d.kind !== "closed" && confirmInput(STATE) !== null;
+  setHidden($("confirm"), !canConfirm);
+  if (canConfirm) setText($("confirm"), confirmLabel(STATE));
+}
+
+const toMin = (v) => { const m = /^(\d{2}):(\d{2})$/.exec(v || ""); return m ? Number(m[1]) * 60 + Number(m[2]) : NaN; };
+const toTime = (m) => String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0");
+const q = (d, c) => document.querySelector('input[data-d="' + d + '"].' + c);
+function readHours() {
+  const h = {};
+  DAYS.forEach((d) => { h[d] = q(d, "on").checked ? [toMin(q(d, "open").value), toMin(q(d, "close").value)] : null; });
+  return h;
+}
+function syncRow(d) { const on = q(d, "on").checked; q(d, "open").disabled = !on; q(d, "close").disabled = !on; }
+function readOverride() {
+  const v = document.querySelector('input[name="today"]:checked').value;
+  return v === "closed" ? { mode: "closed" } : v === "early" ? { mode: "early", closeAt: toMin($("early-time").value) } : null;
+}
+
+function renderStaff() {
+  $("readout").textContent = formatWait(draft.wait);
+  document.querySelectorAll("#presets .btn").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.m) === draft.wait)));
+  $("early-time").disabled = !$("today-early").checked;
+  const res = nextState(STATE, { wait: draft.wait, phone: $("phone").value, hours: readHours(), tz: $("tz").value, override: readOverride() }, new Date().toISOString());
+  if (!res.ok) { $("preview").textContent = "Fix the highlighted entry before posting."; return; }
+  const p = describe(res.state, Date.now());
+  $("preview").textContent = "After you post, patients will see: " + p.headline + (p.kind === "closed" ? ". " + p.detail.split(". ")[0] : "") + ".";
+}
+
+function clearError() {
+  $("err").textContent = "";
+  document.querySelectorAll('[aria-invalid="true"]').forEach((e) => { e.removeAttribute("aria-invalid"); e.removeAttribute("aria-describedby"); });
+}
+function showError(text, field) {
+  $("err").textContent = text;
+  if (field) { field.setAttribute("aria-invalid", "true"); field.setAttribute("aria-describedby", "err"); field.focus(); }
+}
+function say(text) { $("msg").textContent = text; }
+
+async function post() {
+  clearError(); say("");
+  const input = { wait: draft.wait, phone: $("phone").value, hours: readHours(), tz: $("tz").value, override: readOverride() };
+  const res = nextState(STATE, input, new Date().toISOString());
+  if (!res.ok) {
+    if (res.error === "phone") { $("settings").open = true; showError("The phone number does not look right. Use digits, spaces, dashes or parentheses, for example (555) 010-0199, or leave it empty.", $("phone")); }
+    else if (res.error === "hours") {
+      $("settings").open = true;
+      const i = DAY_NAMES.indexOf(res.day), d = i < 0 ? "mon" : DAYS[i], row = q(d, "open");
+      showError(i < 0 ? "The weekly hours are not usable. Check every open day." : "Check " + res.day + "'s hours: the opening time must be before the closing time, and both must be filled in.", row);
+    }
+    else if (res.error === "override") showError("Choose the time the clinic closes today.", $("early-time"));
+    else if (res.error === "tz") { $("settings").open = true; showError("Choose the clinic's time zone.", $("tz")); }
+    else showError("Choose a wait time first.", document.querySelector("#presets .btn"));
+    return;
+  }
+  await submit(res.state);
+}
+
+async function confirmWait() {
+  clearError(); say("");
+  const input = confirmInput(STATE), res = input && nextState(STATE, input, new Date().toISOString());
+  if (!res || !res.ok) { showError("Could not confirm the wait. Check Clinic settings, then choose a wait and tap Post update.", null); return; }
+  await submit(res.state);
+}
+
+// Publish a new copy of this page with the given state. Every failure says whether anything was posted.
+async function submit(state) {
+  let artifact = null;
+  try { artifact = window.claude && (await window.claude.use("artifact")); } catch (e) { artifact = null; }
+  if (!artifact) { showError("Posting is not available here, so nothing was posted. Patients still see the previous number.", null); return; }
+  const busy = (on) => {
+    [$("post"), $("confirm")].forEach((b) => { b.disabled = on; });
+    $("post").textContent = on ? "Posting…" : "Post update";
+    if (on) $("post").setAttribute("aria-busy", "true"); else $("post").removeAttribute("aria-busy");
+  };
+  busy(true);
+  try { sessionStorage.setItem("clinic-post", state.updatedAt); } catch (e) { /* storage may be unavailable */ }
+  try {
+    await artifact.publish(buildPage(state));
+  } catch (e) {
+    busy(false);
+    const c = e && e.code;
+    if (c !== "conflict") { try { sessionStorage.removeItem("clinic-post"); } catch (e2) { /* ignore */ } }
+    if (c === "not_writer" || c === "not_granted") showError("This link is view-only, so nothing was posted. Ask the clinic manager for staff access.", null);
+    else if (c === "rate_limited") showError("You posted too many times in a short while, so nothing was posted. Wait a minute, then try again.", null);
+    else if (c !== "conflict") showError("Could not post. Patients still see the previous number. Check your connection and try again. If it keeps failing, tell patients to call.", null);
+  }
+}
+
+function setup() {
+  [0, 15, 30, 45, 60, 90, 120].forEach((m) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn"; b.dataset.m = String(m); b.textContent = m === 0 ? "None" : String(m);
+    b.setAttribute("aria-label", m === 0 ? "No wait" : m + " minutes");
+    b.addEventListener("click", () => { draft.wait = m; clearError(); renderStaff(); });
+    $("presets").appendChild(b);
+  });
+  const hours = validHours(STATE.hours) ? STATE.hours : DEFAULT_HOURS;
+  [1, 2, 3, 4, 5, 6, 0].forEach((i) => {
+    const d = DAYS[i], v = hours[d], row = document.createElement("div");
+    row.className = "hrow";
+    row.innerHTML = '<span class="day">' + DAY_NAMES[i] + '</span>' +
+      '<label class="on"><input type="checkbox" class="on" data-d="' + d + '"> Open</label>' +
+      '<input type="time" class="open" data-d="' + d + '" aria-label="' + DAY_NAMES[i] + ' opens">' +
+      '<span class="sep" aria-hidden="true">to</span>' +
+      '<input type="time" class="close" data-d="' + d + '" aria-label="' + DAY_NAMES[i] + ' closes">';
+    $("hours").appendChild(row);
+    row.querySelector("input.on").checked = !!v;
+    row.querySelector("input.open").value = toTime(v ? v[0] : 480);
+    row.querySelector("input.close").value = toTime(v ? v[1] : 1020);
+    row.addEventListener("input", () => { syncRow(d); clearError(); renderStaff(); });
+    syncRow(d);
+  });
+  $("tz").value = validTz(STATE.tz) ? STATE.tz : "America/New_York";
+  $("tz").addEventListener("change", () => { clearError(); renderStaff(); });
+  $("minus").addEventListener("click", () => { draft.wait = Math.max(0, draft.wait - 5); clearError(); renderStaff(); });
+  $("plus").addEventListener("click", () => { draft.wait = Math.min(MAX_WAIT, draft.wait + 5); clearError(); renderStaff(); });
+  $("phone").addEventListener("input", () => { clearError(); renderStaff(); });
+  document.querySelectorAll('input[name="today"]').forEach((r) => r.addEventListener("change", () => { clearError(); renderStaff(); }));
+  $("early-time").addEventListener("input", () => { clearError(); renderStaff(); });
+  $("post").addEventListener("click", post);
+  $("confirm").addEventListener("click", confirmWait);
+  $("phone").value = cleanPhone(STATE.phone);
+  // Show today's override if one is still in force on the clinic's own date.
+  const c = clinicClock(Date.now(), STATE.tz), o = STATE.override;
+  let mode = "normal";
+  if (c && validOverride(o) && o && o.date === c.date) { mode = o.closeAt === null ? "closed" : "early"; if (o.closeAt !== null) $("early-time").value = toTime(o.closeAt); }
+  if (!$("early-time").value) $("early-time").value = "13:00";
+  $("today-" + mode).checked = true;
+  renderStaff();
+  try {
+    const v = sessionStorage.getItem("clinic-post");
+    if (v) {
+      sessionStorage.removeItem("clinic-post");
+      if (STATE.updatedAt === v) say("Posted. Patients now see: " + describe(STATE, Date.now()).headline + ".");
+      else showError("Your update was not posted because the page changed at the same moment. Check the current wait above, then post again.", null);
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function route() {
+  const staff = location.hash === "#staff";
+  setHidden($("staff"), !staff); setHidden($("stafflink"), staff);
+}
+window.addEventListener("hashchange", route);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+setup(); route(); render();
+setInterval(render, 30000);
+</script>
+</body>
+</html>

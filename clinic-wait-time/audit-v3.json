@@ -1,0 +1,266 @@
+[
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text ink on bg >= 4.5:1",
+  "pass": true,
+  "detail": "14.66:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text ink on surface >= 4.5:1",
+  "pass": true,
+  "detail": "15.67:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text muted on bg >= 4.5:1",
+  "pass": true,
+  "detail": "6.31:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text muted on surface >= 4.5:1",
+  "pass": true,
+  "detail": "6.74:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text on-accent on accent >= 4.5:1",
+  "pass": true,
+  "detail": "7.29:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border ok vs surface >= 3:1",
+  "pass": true,
+  "detail": "6.54:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border warn vs surface >= 3:1",
+  "pass": true,
+  "detail": "5.93:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border closed vs surface >= 3:1",
+  "pass": true,
+  "detail": "7.93:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border accent vs bg >= 3:1",
+  "pass": true,
+  "detail": "6.82:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border control vs surface >= 3:1",
+  "pass": true,
+  "detail": "3.81:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border control vs bg >= 3:1",
+  "pass": true,
+  "detail": "3.57:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text ink on bg >= 4.5:1",
+  "pass": true,
+  "detail": "15.44:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text ink on surface >= 4.5:1",
+  "pass": true,
+  "detail": "13.58:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text muted on bg >= 4.5:1",
+  "pass": true,
+  "detail": "8.33:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text muted on surface >= 4.5:1",
+  "pass": true,
+  "detail": "7.32:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text on-accent on accent >= 4.5:1",
+  "pass": true,
+  "detail": "7.81:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border ok vs surface >= 3:1",
+  "pass": true,
+  "detail": "8.45:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border warn vs surface >= 3:1",
+  "pass": true,
+  "detail": "9.20:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border closed vs surface >= 3:1",
+  "pass": true,
+  "detail": "7.79:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border accent vs bg >= 3:1",
+  "pass": true,
+  "detail": "8.46:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border control vs surface >= 3:1",
+  "pass": true,
+  "detail": "5.11:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border control vs bg >= 3:1",
+  "pass": true,
+  "detail": "5.81:1"
+ },
+ {
+  "area": "Accessibility/axe",
+  "check": "patient view: no axe violations (22 rules passed)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/axe",
+  "check": "staff view: no axe violations (29 rules passed)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/keyboard",
+  "check": "all interactive elements are native and none uses tabindex > 0",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/keyboard",
+  "check": "Post update is reachable before the hours editor (keyboard users hit the common action first)",
+  "pass": true,
+  "detail": "tab stops before Post: 14, first hours stop at: -1"
+ },
+ {
+  "area": "Accessibility/screen reader",
+  "check": "live region is untouched when a refresh finds nothing changed",
+  "pass": true,
+  "detail": "0 DOM mutations in the live region on an unchanged refresh"
+ },
+ {
+  "area": "Feedback",
+  "check": "a bad phone number gets a specific message that says how to fix it",
+  "pass": true,
+  "detail": "\"The phone number does not look right. Use digits, spaces, dashes or pa\""
+ },
+ {
+  "area": "Feedback",
+  "check": "the error is announced assertively (role=alert)",
+  "pass": true,
+  "detail": "role=alert"
+ },
+ {
+  "area": "Feedback",
+  "check": "focus moves to the field that needs fixing",
+  "pass": true,
+  "detail": "focus on: phone"
+ },
+ {
+  "area": "Feedback",
+  "check": "the invalid field is marked aria-invalid and linked to the message",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "the collapsed settings section opens so the field is not hidden",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "a bad weekly-hours entry names the day",
+  "pass": true,
+  "detail": "\"Check Monday's hours: the opening time must be before the cl\""
+ },
+ {
+  "area": "Feedback",
+  "check": "focus lands on that day's field",
+  "pass": true,
+  "detail": "focus on: Monday opens"
+ },
+ {
+  "area": "Feedback",
+  "check": "'Closing early' with no time explains what to choose and focuses the time",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "a view-only link says nothing was posted and who to ask",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "the Post button recovers after a failure",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "a failed save says patients still see the previous number and what to do",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "while posting the button is disabled, says Posting, and is aria-busy",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Feedback",
+  "check": "after a successful post the reloaded page confirms it",
+  "pass": true,
+  "detail": "\"Posted. Patients now see: We don't have a current \""
+ },
+ {
+  "area": "Feedback",
+  "check": "if someone else posted first, the page says so instead of claiming success",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Information hierarchy",
+  "check": "staff view order: current state, wait, today, preview, Post, then settings",
+  "pass": true,
+  "detail": "back > staff-h > now > nudge > wait-set > today-set > preview > post > err > msg > settings"
+ },
+ {
+  "area": "Information hierarchy",
+  "check": "patient view order: status headline first after the clinic name, then call, then emergency, then staff link",
+  "pass": true,
+  "detail": "clinic > status > call > emergency > stafflink"
+ },
+ {
+  "area": "Clarity",
+  "check": "staff wording uses the admin's own words (Post update, Closing early, Closed all day, Normal hours); no 'override', 'status', or 'tz'",
+  "pass": true,
+  "detail": ""
+ }
+]

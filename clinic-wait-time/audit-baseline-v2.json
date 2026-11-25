@@ -1,0 +1,176 @@
+[
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text ink on bg >= 4.5:1",
+  "pass": true,
+  "detail": "14.66:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text ink on surface >= 4.5:1",
+  "pass": true,
+  "detail": "15.67:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text muted on bg >= 4.5:1",
+  "pass": true,
+  "detail": "6.31:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text muted on surface >= 4.5:1",
+  "pass": true,
+  "detail": "6.74:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: text on-accent on accent >= 4.5:1",
+  "pass": true,
+  "detail": "7.29:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border ok vs surface >= 3:1",
+  "pass": true,
+  "detail": "6.54:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border warn vs surface >= 3:1",
+  "pass": true,
+  "detail": "5.93:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border closed vs surface >= 3:1",
+  "pass": true,
+  "detail": "7.93:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border accent vs bg >= 3:1",
+  "pass": true,
+  "detail": "6.82:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "light: component/border line vs surface >= 3:1",
+  "pass": false,
+  "detail": "1.52:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text ink on bg >= 4.5:1",
+  "pass": true,
+  "detail": "15.44:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text ink on surface >= 4.5:1",
+  "pass": true,
+  "detail": "13.58:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text muted on bg >= 4.5:1",
+  "pass": true,
+  "detail": "8.33:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text muted on surface >= 4.5:1",
+  "pass": true,
+  "detail": "7.32:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: text on-accent on accent >= 4.5:1",
+  "pass": true,
+  "detail": "7.81:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border ok vs surface >= 3:1",
+  "pass": true,
+  "detail": "8.45:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border warn vs surface >= 3:1",
+  "pass": true,
+  "detail": "9.20:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border closed vs surface >= 3:1",
+  "pass": true,
+  "detail": "7.79:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border accent vs bg >= 3:1",
+  "pass": true,
+  "detail": "8.46:1"
+ },
+ {
+  "area": "Accessibility/contrast",
+  "check": "dark: component/border line vs surface >= 3:1",
+  "pass": false,
+  "detail": "1.56:1"
+ },
+ {
+  "area": "Accessibility/axe",
+  "check": "patient view: no axe violations (22 rules passed)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/axe",
+  "check": "staff view: no axe violations (33 rules passed)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/keyboard",
+  "check": "all interactive elements are native and none uses tabindex > 0",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "area": "Accessibility/keyboard",
+  "check": "Post update is reachable before the hours editor (keyboard users hit the common action first)",
+  "pass": false,
+  "detail": "tab stops before Post: 33, first hours stop at: 10"
+ },
+ {
+  "area": "Accessibility/screen reader",
+  "check": "live region is untouched when a refresh finds nothing changed",
+  "pass": false,
+  "detail": "2 DOM mutations in the live region on an unchanged refresh"
+ },
+ {
+  "area": "Feedback",
+  "check": "a bad phone number gets a specific message",
+  "pass": true,
+  "detail": "\"Check the phone number.\""
+ },
+ {
+  "area": "Feedback",
+  "check": "the error is announced assertively (role=alert)",
+  "pass": false,
+  "detail": "role=status"
+ },
+ {
+  "area": "Feedback",
+  "check": "focus moves to the field that needs fixing",
+  "pass": false,
+  "detail": "focus on: BODY"
+ },
+ {
+  "area": "Feedback",
+  "check": "the invalid field is marked aria-invalid",
+  "pass": false,
+  "detail": ""
+ }
+]
